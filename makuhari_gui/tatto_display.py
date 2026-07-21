@@ -7,7 +7,7 @@ Window is resizable and canvas scales dynamically
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import UInt16MultiArray
+from tatto_ros2_msgs.msg import SensorArray
 import tkinter as tk
 from tkinter import font
 import signal
@@ -30,8 +30,8 @@ class SensorDisplayNode(Node):
         self.has_new_message = False
         
         self.subscription = self.create_subscription(
-            UInt16MultiArray,
-            'sensor_values',
+            SensorArray,
+            '/tatto/sensor_values',
             self.callback,
             10
         )
@@ -40,11 +40,13 @@ class SensorDisplayNode(Node):
     
     def callback(self, msg):
         """トピックコールバック"""
-        if len(msg.data) != 9:
-            self.get_logger().warn(f'Invalid message size: expected 9, got {len(msg.data)}')
+
+        data = msg.data.data
+        if len(data) != 9:
+            self.get_logger().warn(f'Invalid message size: expected 9, got {len(data)}')
             return
         
-        self.sensor_data = list(msg.data)
+        self.sensor_data = [int(v) for v in data]
         self.message_count += 1
         self.has_new_message = True
         
